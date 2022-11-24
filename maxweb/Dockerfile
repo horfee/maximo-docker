@@ -24,21 +24,22 @@ WORKDIR /tmp
 # Install IBM HTTP Server V9
 ENV WASND_IHS_NAME was.repo.9000.ihs
 ENV WASND_JAVA_NAME sdk.repo.8030.java8.linux
-RUN wget -q ${url}/${WASND_IHS_NAME}.zip \
- && wget -q ${url}/${WASND_JAVA_NAME}.zip \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl -acceptLicense \
+COPY ${WASND_IHS_NAME}.zip /tmp
+COPY ${WASND_JAVA_NAME}.zip /tmp
+
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl -acceptLicense \
    install com.ibm.websphere.IHS.v90 com.ibm.java.jdk.v8 \
    -repositories /tmp/${WASND_IHS_NAME}.zip,/tmp/${WASND_JAVA_NAME}.zip \
    -properties user.ihs.httpPort=${httpport} \
    -preferences com.ibm.cic.common.core.preferences.preserveDownloadedArtifacts=false \
- && rm -rf ${WASND_IHS_NAME}* \
- && rm -rf ${WASND_JAVA_NAME}*
+ && rm -rf ${WASND_IHS_NAME}*
 
 # Install WebSphere Plugin V9
+
 ENV WASND_PLG_NAME was.repo.9000.plugins
-RUN wget -q ${url}/${WASND_PLG_NAME}.zip \
- && wget -q ${url}/${WASND_JAVA_NAME}.zip \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl -acceptLicense \
+COPY ${WASND_PLG_NAME}.zip /tmp
+
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl -acceptLicense \
    install com.ibm.websphere.PLG.v90 com.ibm.java.jdk.v8 \
    -repositories /tmp/${WASND_PLG_NAME}.zip,/tmp/${WASND_JAVA_NAME}.zip \
    -installationDirectory /opt/IBM/WebSphere/Plugins \
@@ -48,8 +49,10 @@ RUN wget -q ${url}/${WASND_PLG_NAME}.zip \
 
 # Install IBM HTTP Server and WebSphere Plugin V9 fix pack 7
 ENV WASFP_IHS_NAME 9.0.0-WS-IHSPLG-FP0${fp}
-RUN wget -q ${url}/${WASFP_IHS_NAME}.zip \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl \
+
+COPY ${WASFP_IHS_NAME}.zip /tmp
+
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl \
    -acceptLicense install com.ibm.websphere.IHS.v90 com.ibm.websphere.PLG.v90 \
    -repositories ${WASFP_IHS_NAME}.zip \
    -preferences com.ibm.cic.common.core.preferences.preserveDownloadedArtifacts=false \
@@ -57,8 +60,10 @@ RUN wget -q ${url}/${WASFP_IHS_NAME}.zip \
 
 # Install IBM Java SDK Fix pack
 ENV JAVA_SDK_NAME ibm-java-sdk-8.0-${javafp}-linux-x64-installmgr
-RUN wget -q ${url}/${JAVA_SDK_NAME}.zip \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl \
+
+COPY ${JAVA_SDK_NAME}.zip /tmp
+
+RUN /opt/IBM/InstallationManager/eclipse/tools/imcl \
    -acceptLicense install com.ibm.java.jdk.v8 \
    -repositories /tmp/${JAVA_SDK_NAME}.zip \
    -installationDirectory /opt/IBM/HTTPServer \
@@ -73,7 +78,7 @@ RUN wget -q ${url}/${JAVA_SDK_NAME}.zip \
 RUN mkdir /work
 WORKDIR /work
 
-RUN wget -q https://raw.githubusercontent.com/wsadminlib/wsadminlib/master/bin/wsadminlib.py
+#RUN wget -q https://raw.githubusercontent.com/wsadminlib/wsadminlib/master/bin/wsadminlib.py
 
 ENV WAS_HOME /opt/IBM/WebSphere/AppServer
 ENV PROFILE_NAME ctgWebSrv01

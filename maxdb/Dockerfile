@@ -9,7 +9,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM ubuntu:18.04
+#FROM ubuntu:18.04
+FROM maximobase:1.0
 
 MAINTAINER Yasutaka Nishimura nishi2go@gmail.com
 
@@ -19,9 +20,9 @@ ARG ver=11.1
 ARG fp=4fp4a
 
 ## Install required software
-RUN dpkg --add-architecture i386
-RUN apt update -y && apt install -y wget unzip bsdtar netcat file libx32stdc++6 libpam0g:i386 binutils libaio1 libnuma1 \
-    && rm -rf /var/lib/apt/lists/*
+#RUN dpkg --add-architecture i386
+#RUN apt update -y && apt install -y wget unzip bsdtar netcat file libx32stdc++6 libpam0g:i386 binutils libaio1 libnuma1 \
+#    && rm -rf /var/lib/apt/lists/*
 
 ## Set kernel params
 RUN echo "root soft nofile 8192" >> /etc/security/limits.d/99-maximo.conf
@@ -62,8 +63,9 @@ RUN mkdir /backup && chown ctginst1.ctggrp1 /backup
 
 # Install DB2 V11.1
 COPY db2awse.rsp /work
-RUN wget -q $url/$DB2_IMAGE \
-  && bsdtar -zxpf $DB2_IMAGE \
+COPY $DB2_IMAGE /work
+
+RUN bsdtar -zxpf $DB2_IMAGE \
   && ./server_awse_o/db2setup -r ./db2awse.rsp \
   && /opt/ibm/db2/V11.1/adm/db2licm -a ./server_awse_o/db2/license/db2awse_o.lic \
   && /opt/ibm/db2/V11.1/adm/db2licm -l \
@@ -71,8 +73,9 @@ RUN wget -q $url/$DB2_IMAGE \
 
 # Install DB2 Fixpack
 ENV DB2_FP_IMAGE v${ver}.${fp}_linuxx64_server_t.tar.gz
-RUN wget -q $url/$DB2_FP_IMAGE \
-  && bsdtar -zxpf $DB2_FP_IMAGE \
+COPY $DB2_FP_IMAGE /work
+
+RUN bsdtar -zxpf $DB2_FP_IMAGE \
   && cd server_t \
   && ./installFixPack -n -b /opt/ibm/db2/V${ver} \
    -f NOTSAMP -f update -f nobackup \

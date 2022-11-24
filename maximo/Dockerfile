@@ -25,7 +25,7 @@ ENV TEMP /tmp
 WORKDIR /tmp
 
 # Install required packages
-RUN apt update && apt install -y netcat inetutils-ping && rm -rf /var/lib/apt/lists/*
+#RUN apt update && apt install -y netcat inetutils-ping && rm -rf /var/lib/apt/lists/*
 
 ## Install Maximo middleware and installer
 RUN mkdir /Launchpad
@@ -36,7 +36,9 @@ ENV BYPASS_PRS=True
 ## Install Maximo V7.6.1
 ENV MAM_IMAGE MAM_7.6.1_LINUX64.tar.gz
 ## Remove z from tar command because file is not gzipped despite having gz extension
-RUN wget -q $url/$MAM_IMAGE && tar xpf $MAM_IMAGE \
+COPY $MAM_IMAGE /Launchpad
+
+RUN tar xpf $MAM_IMAGE \
  && /opt/IBM/InstallationManager/eclipse/tools/imcl \
  -input /Launchpad/SilentResponseFiles/Unix/ResponseFile_MAM_Install_Unix.xml \
  -acceptLicense -log /tmp/MAM_Install_Unix.xml \
@@ -48,8 +50,9 @@ WORKDIR /work
 # Install Maximo V7.6.1 feature pack
 
 ENV MAM_FP_IMAGE MAMMTFP761${fp}IMRepo.zip
-RUN if [ "${installfp}" = "yes" ]; then wget -q $url/$MAM_FP_IMAGE && sleep 30 \
- && /opt/IBM/InstallationManager/eclipse/tools/imcl install \
+COPY $MAM_FP_IMAGE /work
+
+RUN if [ "${installfp}" = "yes" ]; then /opt/IBM/InstallationManager/eclipse/tools/imcl install \
  com.ibm.tivoli.tpae.base.tpae.main -repositories /work/$MAM_FP_IMAGE \
  -installationDirectory /opt/IBM/SMP -log /tmp/FP_Install_Unix.xml -acceptLicense \
  && /opt/IBM/InstallationManager/eclipse/tools/imcl install \
@@ -85,10 +88,10 @@ ENV APP_SERVER_HOST_NAME maxapps
 ENV APP_SERVER_PORT 8878
 ENV UPDATE_APPS_ON_REBOOT yes
 
-RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
-    && mv wait-for-it.sh /usr/local/bin && chmod +x /usr/local/bin/wait-for-it.sh
+#RUN wget -q https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+#    && mv wait-for-it.sh /usr/local/bin && chmod +x /usr/local/bin/wait-for-it.sh
 
-RUN wget -q https://raw.githubusercontent.com/wsadminlib/wsadminlib/master/bin/wsadminlib.py
+#RUN wget -q https://raw.githubusercontent.com/wsadminlib/wsadminlib/master/bin/wsadminlib.py
 
 COPY StopAllServers.py /work
 COPY StartAllServers.py /work

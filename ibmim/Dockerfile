@@ -10,7 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ubuntu:18.04
+#FROM ubuntu:18.04
+FROM maximobase:1.0
 
 MAINTAINER Yasutaka Nishimura <nishi2go@gmail.com>
 
@@ -21,13 +22,15 @@ ENV TEMP /tmp
 WORKDIR /tmp
 
 # Install required packages
-RUN apt update && apt install -y wget unzip && rm -rf /var/lib/apt/lists/*
+#RUN apt update && apt install -y wget unzip && rm -rf /var/lib/apt/lists/*
 
 # Install IBM Installation Manager 1.8.8
 ENV IM_IMAGE IED_V1.8.8_Wins_Linux_86.zip
 
-RUN mkdir /Install_Mgr && wget -q $url/$IM_IMAGE \
- && unzip -q -d /Install_Mgr $IM_IMAGE \
+RUN mkdir /Install_Mgr 
+COPY $IM_IMAGE /tmp
+
+RUN unzip -q -d /Install_Mgr $IM_IMAGE \
  && rm $IM_IMAGE \
  && /Install_Mgr/EnterpriseDVD/Linux_x86_64/EnterpriseCD-Linux-x86_64/InstallationManager/installc -log /tmp/IM_Install_Unix.xml -acceptLicense \
  && rm -rf /Install_Mgr
